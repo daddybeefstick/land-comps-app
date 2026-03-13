@@ -65,8 +65,9 @@ git pull
 
 | Syncs via Git | Does not sync |
 |---------------|----------------|
-| Code, configs, scripts | `.env` (API keys) – copy manually or recreate from `.env.example` |
-| `nc_sc_exclude_zpids.txt` | `database/deals.db` – re-collect or copy manually |
-| Export CSVs | `.cache/` (enrichment cache) |
+| Code, configs, scripts, `deal_scout/.env` (API key) | `database/deals.db` – re-collect or copy manually |
+| `nc_sc_exclude_zpids.txt`, export CSVs | `.cache/` (enrichment cache) |
 
-To sync the database between devices, copy `deal_scout/database/deals.db` manually (e.g. cloud storage or USB) or re-run `python main.py collect` on the new device (uses API calls).
+**Keep repo private** – `.env` is committed. If you make it public, rotate your API key first.
+
+To sync the database, copy `deal_scout/database/deals.db` manually or re-run `python main.py collect` on the new device (uses API calls).

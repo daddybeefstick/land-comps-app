@@ -22,9 +22,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# local env files (allow deal_scout/.env for multi-device sync)
 .env*.local
 .env
+!deal_scout/.env
 
 # puppeteer session (stores login cookies – do not commit)
 .puppeteer-session
@@ -40,8 +41,7 @@ next-env.d.ts
 /prisma/*.db
 /prisma/*.db-journal
 
-# deal_scout Python app
-deal_scout/.env
+# deal_scout Python app (keep .env committed for easy multi-device sync; repo must stay private)
 deal_scout/database/*.db
 deal_scout/database/*.db-journal
 deal_scout/.cache/
