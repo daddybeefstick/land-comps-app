@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model GeocodeCache {
+  id        String   @id @default(cuid())
+  query     String   @unique
+  lat       Float
+  lon       Float
+  address   String?
+  county    String?
+  state     String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model ParcelCache {
+  id          String   @id @default(cuid())
+  apn         String?
+  address     String?
+  county      String
+  state       String
+  lat         Float
+  lon         Float
+  acres       Float?
+  zoning      String?
+  landUse     String?
+  accessGuess String?
+  floodFlag   String?
+  slopeFlag   String?
+  rawData     String?  // JSON string
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([apn])
+  @@index([address])
+  @@index([county, state])
+  @@index([expiresAt])
+}
+
+model CompCache {
+  id          String   @id @default(cuid())
+  parcelId    String   // Reference to ParcelCache or subject
+  apn         String?
+  address     String?
+  county      String
+  state       String
+  lat         Float
+  lon         Float
+  acres       Float
+  price       Float
+  pricePerAcre Float
+  saleDate    DateTime?
+  listingDate DateTime?
+  status      String   // "sold" or "active"
+  distance    Float?   // Distance from subject in miles
+  rawData     String?  // JSON string
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([parcelId])
+  @@index([county, state])
+  @@index([expiresAt])
+}
+
+model ReportCache {
+  id          String   @id @default(cuid())
+  query       String   // Original address or APN
+  reportData  String   // JSON string of full report
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([query])
+  @@index([expiresAt])
+}

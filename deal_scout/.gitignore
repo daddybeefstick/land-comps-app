@@ -1,0 +1,13 @@
+# Virtual env and cache
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets (don’t commit)
+.env
+
+# OS
+.DS_Store
+
+# Keep example for setup
+!.env.example

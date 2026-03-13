@@ -1,0 +1,21 @@
+id,zpid,state,county,address,city,zipcode,price,acres,price_per_acre,days_on_market,score,status,roi_pct,net_profit,red_flags
+2914,447922951,TX,Smith County,"21746 County Road 2138, Troup, TX, 75789",Troup,75789,189000.0,45.364,4166.3,23,80,review,160.55,303447.75,Projected profit is estimated
+2989,446004373,TX,Lampasas County,"E Fm 581, Lometa, TX, 76853",Lometa,76853,275000.0,30.0841,9141.04,408,70,manual_review,102.04,280610.9,"Projected profit is estimated, Long DOM"
+2927,459939009,TX,Gregg County,"TRACT Seven Venus Rd, Gladewater, TX, 75647",Gladewater,75647,136153.0,38.323,3552.78,42,65,review,99.45,135400.88,Projected profit is estimated
+2943,224944537,TX,Medina County,"299 CR 779, Devine, TX, 78016",Devine,78016,265000.0,31.584,8390.32,142,60,review,68.02,180263.65,Projected profit is estimated
+2857,456789682,TX,Robertson County,"5403 Dry Creek Ln, Calvert, TX, 77837",Calvert,77837,329000.0,40.0,8225.0,169,50,manual_review,62.83,206710.6,"Projected profit is estimated, Borderline deal kept for manual review"
+2854,2060438770,TX,Kaufman County,"0 Co Rd #218, Forney, TX, 75126",Forney,75126,399000.0,27.4,14562.04,330,45,manual_review,51.76,206540.0,"Projected profit is estimated, Long DOM, Borderline deal kept for manual review"
+2985,460777030,TX,Eastland County,"101 Highway, Ranger, TX, 76470",Ranger,76470,299000.0,48.12,6213.63,5,40,reject,30.18,90225.95,Projected profit is estimated
+2916,455402457,TX,Atascosa County,"0 Pr Riley LOT 23, Poteet, TX, 78065",Poteet,78065,147500.0,14.024,10517.68,42,40,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2820,455575613,TX,Wood County,"County Road 3419, Hawkins, TX, 75765",Hawkins,75765,60000.0,16.46,3645.2,51,40,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2804,459762523,TX,Van Zandt County,"Vz County Road 1905, Edgewood, TX, 75117",Edgewood,75117,98000.0,17.14,5717.62,51,40,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2842,459651089,TX,Houston County,"Tbdlot 3 County Rd #2240, Grapeland, TX, 75844",Grapeland,75844,68000.0,12.0,5666.67,57,40,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2865,243024428,TX,Johnson County,"8740 Parkview Ct, Cleburne, TX, 76033",Cleburne,76033,79000.0,6.116,12916.94,62,40,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2868,455918390,TX,Cameron County,"122313 Old Port Isabel Rd, Pt Isabel, TX, 78578",Pt Isabel,78578,32000.0,6.5,4923.08,97,35,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2802,458390084,TX,Collin County,"1293 Windflower Way, Allen, TX, 75013",Allen,75013,75000.0,7.14,10504.2,108,35,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2801,458840337,TX,Montgomery County,"Palmetto Rd, Magnolia, TX, 77354",Magnolia,77354,175000.0,18.59,9413.66,147,35,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2794,26499294,TX,Brazoria County,"34823 Fm 1301 Rd, West Columbia, TX, 77486",West Columbia,77486,6032.0,5.73,1052.71,156,35,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2995,460880334,TX,Hunt County,"LOT 19 County Road 4813, Commerce, TX, 75428",Commerce,75428,89900.0,12.1,7429.75,1,30,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+3011,460867784,TX,Montgomery County,"Morgan Cemetary Rd, Cleveland, TX, 77328",Cleveland,77328,75000.0,7.5,10000.0,2,30,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2826,455713421,TX,Rains County,"Rs County Rd #1520, Pt, TX, 75472",Pt,75472,184140.0,10.23,18000.0,7,30,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"
+2936,344605039,TX,Comal County,"162 Zinnia LOT 668, Spring Branch, TX, 78070",Spring Branch,78070,145000.0,6.52,22239.26,13,30,reject,0.0,0.0,"Projected profit is estimated, ROI below threshold"

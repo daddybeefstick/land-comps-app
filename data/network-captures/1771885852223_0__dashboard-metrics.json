@@ -1,0 +1,44 @@
+{
+  "success": true,
+  "avg_net_profit": 0,
+  "letters_sent": 0,
+  "response_rate": 0,
+  "offers_sent": 0,
+  "acquisitions_total": 0,
+  "acquisitions_avg_per_year": 0,
+  "deals_closed_total": 0,
+  "deals_closed_avg_per_year": 0,
+  "avg_margin_percent": 0,
+  "acquisitions_by_month": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "closed_by_month": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "available_years": [
+    "2026"
+  ],
+  "current_year": 2026
+}

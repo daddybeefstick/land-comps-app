@@ -1,0 +1,3 @@
+address,state,county,city,zipcode,price,acres,url,days_on_market
+"123 Main St",NC,Wake County,Raleigh,27601,250000,25,https://example.com/listing1,45
+"456 Oak Ave",SC,Charleston County,Charleston,29401,350000,35,,30

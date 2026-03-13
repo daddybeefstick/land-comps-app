@@ -1,0 +1,152 @@
+NC/SC subdivision candidates for review (best counties from Zillow PDF)
+Source: nc_sc_pipeline_all_scored.csv -> 50 properties
+
+ 1. Concord Ln, Walterboro, SC, 29488 - Colleton County, SC (6 in county)
+    Walterboro 29488  |  $251,550  |  45.0 ac  |  DOM 182  |  Score 20  reject
+
+ 2. 0 Short Ridge Ln, Clyde, NC, 28721 - Haywood County, NC (7 in county)
+    Clyde 28721  |  $115,000  |  20.87 ac  |  DOM 195  |  Score 20  reject
+
+ 3. Mingo Rd, Heath Springs, SC, 29058 - Lancaster County, SC (10 in county)
+    Heath Springs 29058  |  $310,000  |  40.0 ac  |  DOM 325  |  Score 20  reject
+
+ 4. Tbd 40 Cunningham Quarters Rd, Heath Springs, SC, 29058 - Lancaster County, SC (10 in county)
+    Heath Springs 29058  |  $310,000  |  40.0 ac  |  DOM 325  |  Score 20  reject
+
+ 5. Xx Gilley Rd, Pilot Mountain, NC, 27041 - Surry County, NC (8 in county)
+    Pilot Mountain 27041  |  $175,000  |  20.631 ac  |  DOM 378  |  Score 20  reject
+
+ 6. 0 Harborgate Dr #2, Denton, NC, 27239 - Davidson County, NC (4 in county)
+    Denton 27239  |  $250,000  |  33.15 ac  |  DOM 644  |  Score 20  reject
+
+ 7. 0 Mack Rd, Seagrove, NC, 27341 - Moore County, NC (6 in county)
+    Seagrove 27341  |  $291,600  |  24.3 ac  |  DOM 1  |  Score 15  reject
+
+ 8. Cauble Rd, Mount Pleasant, NC, 28124 - Cabarrus County, NC (2 in county)
+    Mount Pleasant 28124  |  $500,000  |  20.0 ac  |  DOM 1  |  Score 15  reject
+
+ 9. 0 Cates Mill Rd Lot 1, Roxboro, NC, 27574 - Person County, NC (4 in county)
+    Roxboro 27574  |  $199,000  |  24.7 ac  |  DOM 2  |  Score 15  reject
+
+10. White Pond Rd, Williston, SC, 29853 - Aiken County, SC (2 in county)
+    Williston 29853  |  $175,000  |  20.0 ac  |  DOM 2  |  Score 15  reject
+
+11. 4794 Cauble Rd, Mount Pleasant, NC, 28124 - Cabarrus County, NC (2 in county)
+    Mount Pleasant 28124  |  $500,000  |  20.0 ac  |  DOM 2  |  Score 15  reject
+
+12. 2431 Camp Creek Church Rd, Mooresboro, NC, 28114 - Cleveland County, NC (8 in county)
+    Mooresboro 28114  |  $220,000  |  24.0 ac  |  DOM 3  |  Score 15  reject
+
+13. 7 Sim Dawson Rd, New Bern, NC, 28562 - Craven County, NC (2 in county)
+    New Bern 28562  |  $365,000  |  36.92 ac  |  DOM 4  |  Score 15  reject
+
+14. 0 Highway 521 Byp S, Lancaster, SC, 29720 - Lancaster County, SC (10 in county)
+    Lancaster 29720  |  $495,000  |  26.94 ac  |  DOM 6  |  Score 15  reject
+
+15. 0 Liberty Grove Rd, Liberty, NC, 27298 - Randolph County, NC (7 in county)
+    Liberty 27298  |  $195,000  |  20.7 ac  |  DOM 6  |  Score 15  reject
+
+16. 0 Split Drive SE, Bolivia, NC, 28422 - Brunswick County, NC (2 in county)
+    Bolivia 28422  |  $260,000  |  28.3 ac  |  DOM 6  |  Score 15  reject
+
+17. 0 Snow Hill Church Rd, Lawsonville, NC, 27022 - Stokes County, NC (6 in county)
+    Lawsonville 27022  |  $149,900  |  22.68 ac  |  DOM 7  |  Score 15  reject
+
+18. 0 State Highway 89 W, Danbury, NC, 27016 - Stokes County, NC (6 in county)
+    Danbury 27016  |  $399,000  |  22.22 ac  |  DOM 7  |  Score 15  reject
+
+19. 2427 Highway 24 Highway Rd #27, Eagle Springs, NC, 27242 - Cumberland County, NC (5 in county)
+    Eagle Springs 27242  |  $300,000  |  25.39 ac  |  DOM 7  |  Score 15  reject
+
+20. 0 Rutinbuck Ln, Cottageville, SC, 29435 - Colleton County, SC (6 in county)
+    Cottageville 29435  |  $349,000  |  31.3 ac  |  DOM 8  |  Score 15  reject
+
+21. 0 Moses Dingle Rd, Summerton, SC, 29148 - Clarendon County, SC (4 in county)
+    Summerton 29148  |  $227,000  |  34.89 ac  |  DOM 9  |  Score 15  reject
+
+22. 0 Acres Rd N, Greenwood, SC, 29649 - Greenwood County, SC (2 in county)
+    Greenwood 29649  |  $389,000  |  30.1 ac  |  DOM 9  |  Score 15  reject
+
+23. TRACT Highway 89 W #C, Danbury, NC, 27016 - Stokes County, NC (6 in county)
+    Danbury 27016  |  $262,500  |  21.0 ac  |  DOM 13  |  Score 15  reject
+
+24. 0 Mule Stomp Rd, Clyde, NC, 28721 - Haywood County, NC (7 in county)
+    Clyde 28721  |  $375,000  |  41.0 ac  |  DOM 17  |  Score 15  reject
+
+25. Highway 917, Nichols, SC, 29581 - Horry County, SC (7 in county)
+    Nichols 29581  |  $309,999  |  20.84 ac  |  DOM 19  |  Score 15  reject
+
+26. 0 Grifton Hugo Road, Grifton, NC, 28530 - Lenoir County, NC (2 in county)
+    Grifton 28530  |  $164,900  |  28.94 ac  |  DOM 20  |  Score 15  reject
+
+27. 0 Beechwood Dr, Asheboro, NC, 27205 - Randolph County, NC (7 in county)
+    Asheboro 27205  |  $379,000  |  22.94 ac  |  DOM 21  |  Score 15  reject
+
+28. 00-00 Neely Ferry Rd, Laurens, SC, 29360 - Laurens County, SC (5 in county)
+    Laurens 29360  |  $300,000  |  24.15 ac  |  DOM 24  |  Score 15  reject
+
+29. 2532 M G Hemingway Rd, Summerton, SC, 29148 - Clarendon County, SC (4 in county)
+    Summerton 29148  |  $224,000  |  33.0 ac  |  DOM 24  |  Score 15  reject
+
+30. 747 Chandler Rd, Dobson, NC, 27017 - Surry County, NC (8 in county)
+    Dobson 27017  |  $299,000  |  20.0 ac  |  DOM 27  |  Score 15  reject
+
+31. 0 Thomas Rd, Dorchester, SC, 29437 - Dorchester County, SC (1 in county)
+    Dorchester 29437  |  $359,000  |  27.88 ac  |  DOM 27  |  Score 15  reject
+
+32. 0 Neely Ferry Rd, Laurens, SC, 29360 - Laurens County, SC (5 in county)
+    Laurens 29360  |  $300,000  |  24.15 ac  |  DOM 28  |  Score 15  reject
+
+33. 252 Highway, Laurens, SC, 29360 - Laurens County, SC (5 in county)
+    Laurens 29360  |  $440,280  |  24.46 ac  |  DOM 28  |  Score 15  reject
+
+34. 1444 Derby Dr, Shelby, NC, 28150 - Cleveland County, NC (8 in county)
+    Shelby 28150  |  $415,000  |  20.8 ac  |  DOM 35  |  Score 15  reject
+
+35. 1012 S Halifax Rd, Rocky Mount, NC, 27803 - Nash County, NC (5 in county)
+    Rocky Mount 27803  |  $275,000  |  20.0 ac  |  DOM 38  |  Score 15  reject
+
+36. Alexander Rd, West Union, SC, 29696 - Oconee County, SC (6 in county)
+    West Union 29696  |  $395,000  |  24.0 ac  |  DOM 40  |  Score 15  reject
+
+37. 0 Shelton Laurel Rd, Clyde, NC, 28721 - Haywood County, NC (7 in county)
+    Clyde 28721  |  $500,000  |  34.02 ac  |  DOM 41  |  Score 15  reject
+
+38. 0 Garris Hill Loop, Smoaks, SC, 29481 - Colleton County, SC (6 in county)
+    Smoaks 29481  |  $329,700  |  47.1 ac  |  DOM 43  |  Score 15  reject
+
+39. 4333 Kirby Dr #10-14-4, Morganton, NC, 28655 - Burke County, NC (8 in county)
+    Morganton 28655  |  $299,900  |  28.78 ac  |  DOM 50  |  Score 15  reject
+
+40. 0 Raymond Rd, Orangeburg, SC, 29118 - Orangeburg County, SC (5 in county)
+    Orangeburg 29118  |  $174,150  |  23.2 ac  |  DOM 53  |  Score 15  reject
+
+41. 1805 Shepard School Rd, Zebulon, NC, 27597 - Wake County, NC (1 in county)
+    Zebulon 27597  |  $485,000  |  24.62 ac  |  DOM 55  |  Score 15  reject
+
+42. 0 Doug Stanley Rd, Sandy Ridge, NC, 27046 - Stokes County, NC (6 in county)
+    Sandy Ridge 27046  |  $205,000  |  33.4 ac  |  DOM 56  |  Score 15  reject
+
+43. TBD 37 Acres Highway 9 W, Nichols, SC, 29581 - Horry County, SC (7 in county)
+    Nichols 29581  |  $350,000  |  37.0 ac  |  DOM 58  |  Score 15  reject
+
+44. Mann Oakley Rd, Rougemont, NC, 27572 - Person County, NC (4 in county)
+    Rougemont 27572  |  $170,000  |  20.4 ac  |  DOM 59  |  Score 15  reject
+
+45. 0 Mann Oakley Rd Lot 1-2, Rougemont, NC, 27572 - Person County, NC (4 in county)
+    Rougemont 27572  |  $170,000  |  20.39 ac  |  DOM 60  |  Score 15  reject
+
+46. Moses Dingle Rd, Manning, SC, 29102 - Clarendon County, SC (4 in county)
+    Manning 29102  |  $265,000  |  33.84 ac  |  DOM 60  |  Score 15  reject
+
+47. Remington Way Lot 2, Richlands, NC, 28574 - Onslow County, NC (2 in county)
+    Richlands 28574  |  $400,000  |  29.2 ac  |  DOM 60  |  Score 15  reject
+
+48. W Manchester Rd, Spring Lake, NC, 28390 - Cumberland County, NC (5 in county)
+    Spring Lake 28390  |  $399,000  |  40.71 ac  |  DOM 62  |  Score 15  reject
+
+49. 0 Wayward Cv, Clyde, NC, 28721 - Haywood County, NC (7 in county)
+    Clyde 28721  |  $395,000  |  23.95 ac  |  DOM 63  |  Score 15  reject
+
+50. 22.24 Beaver Dam Road, Middlesex, NC, 27557 - Nash County, NC (5 in county)
+    Middlesex 27557  |  $360,000  |  22.24 ac  |  DOM 63  |  Score 15  reject

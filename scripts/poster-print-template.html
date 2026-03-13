@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Research Poster - Cut & Glue Print Template</title>
+<style>
+@page { size: letter; margin: 0.5in; }
+* { box-sizing: border-box; }
+body { font-family: 'Times New Roman', Georgia, serif; margin: 0; padding: 0; font-size: 9pt; }
+/* Each section is a printable tile at exact dimensions */
+.tile { 
+  position: relative;
+  border: 2px dashed #333;
+  padding: 6px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.tile-label {
+  font-size: 7pt;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+.tile-content { line-height: 1.25; }
+.tile-content ul { margin: 4px 0; padding-left: 14px; }
+.tile-content li { margin-bottom: 3px; }
+/* Exact dimensions per template - 5" width, various heights */
+.w-5 { width: 5in !important; }
+.h-225 { height: 2.25in !important; }
+.h-300 { height: 3.00in !important; }
+.h-350 { height: 3.50in !important; }
+.h-375 { height: 3.75in !important; }
+.h-400 { height: 4.00in !important; }
+.h-425 { height: 4.25in !important; }
+.h-450 { height: 4.50in !important; }
+.h-500 { height: 5.00in !important; }
+.h-550 { height: 5.50in !important; }
+.cut-line { border: 2px dashed #999; }
+.print-page { 
+  width: 8.5in; 
+  min-height: 11in; 
+  padding: 0.5in; 
+  page-break-after: always;
+}
+.print-page:last-child { page-break-after: auto; }
+.section-title { font-weight: bold; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 0: LAYOUT GUIDE - Reference when gluing to 16.5"×14" poster -->
+<div class="print-page" style="background:#f8f8f8;">
+  <div style="font-weight:bold;font-size:11pt;margin-bottom:8px;">POSTER LAYOUT GUIDE — 16.5" × 14"</div>
+  <div style="font-size:9pt;margin-bottom:12px;color:#555;">Cut each section along the dashed lines, then glue onto your poster board in 2 columns. Usable area: 15.5" × 13" with 0.5" margins.</div>
+  <table style="width:100%;font-size:8pt;border-collapse:collapse;">
+    <tr style="background:#e0e0e0;"><th style="text-align:left;padding:4px;">Section</th><th>Dimensions</th><th>Column</th></tr>
+    <tr><td style="padding:4px;">Title</td><td>Full width</td><td>Top</td></tr>
+    <tr><td style="padding:4px;">Thesis</td><td>5" × 2.25"</td><td>Top</td></tr>
+    <tr><td style="padding:4px;">Why This Topic Matters</td><td>5" × 2.25"</td><td>Left</td></tr>
+    <tr><td style="padding:4px;">Pathway 1: AI in Student Workflow</td><td>5" × 4.25"</td><td>Right</td></tr>
+    <tr><td style="padding:4px;">Pathway 2: Quality of Work</td><td>5" × 4.50"</td><td>Left</td></tr>
+    <tr><td style="padding:4px;">Pathway 3: Retention / Learning</td><td>5" × 4.00"</td><td>Right</td></tr>
+    <tr><td style="padding:4px;">Pathway 4: Moderating Factors</td><td>5" × 3.00"</td><td>Right</td></tr>
+    <tr><td style="padding:4px;">Quantitative Visual</td><td>5" × 5.50"</td><td>Left</td></tr>
+    <tr><td style="padding:4px;">Limitations</td><td>5" × 3.50"</td><td>Right</td></tr>
+    <tr><td style="padding:4px;">Overall Conclusion</td><td>5" × 3.00"</td><td>Right</td></tr>
+    <tr><td style="padding:4px;">Name / Course / Date</td><td>Full width</td><td>Bottom</td></tr>
+  </table>
+  <p style="font-size:8pt;margin-top:8px;color:#666;">Tip: Arrange left-column and right-column pieces with ~0.25" gap between columns.</p>
+</div>
+
+<!-- PAGE 1: Title, Thesis, Why This Topic Matters -->
+<div class="print-page">
+  <div class="tile w-5 h-375 cut-line">
+    <div class="tile-label">Place at TOP of poster</div>
+    <div class="section-title">RESEARCH POSTER TITLE</div>
+    <div class="tile-content">AI in Student Research: Support vs. Replacement</div>
+  </div>
+
+  <div class="tile w-5 h-225 cut-line">
+    <div class="tile-label">Place below title</div>
+    <div class="section-title">THESIS (1-2 LINES)</div>
+    <div class="tile-content">
+      When generative AI is used as a shortcut that replaces reading, note-taking, and drafting, college students' research quality and knowledge retention tend to decline; when it is used as a support tool with verification and reflection, it can strengthen the writing process without replacing critical thinking.
+    </div>
+  </div>
+
+  <div class="tile w-5 h-225 cut-line">
+    <div class="tile-label">WHY THIS TOPIC MATTERS — 5" × 2.25"</div>
+    <div class="tile-content">
+      <ul>
+        <li>AI tools are now common in student research and writing (Freeman).</li>
+        <li>Main risk: AI hallucinations—false details and facts (UW Libraries; Shao; Ji et al.).</li>
+        <li>AI can help with outlining, revising, explanations if students fact-check.</li>
+        <li>Affects learning, knowledge retention, and skill development.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: Pathway 1, Pathway 2 -->
+<div class="print-page">
+  <div class="tile w-5 h-425 cut-line">
+    <div class="tile-label">PATHWAY 1: AI IN STUDENT WORKFLOW — 5" × 4.25"</div>
+    <div class="tile-content">
+      <ul>
+        <li>Many students use AI for brainstorming, summarizing, quick explanations (Freeman).</li>
+        <li>Speeds up planning but can replace close reading if students copy output instead of checking sources.</li>
+        <li>AI changes workflow when it replaces steps (reading, notes) instead of guiding.</li>
+        <li>Best outcomes: AI like a teacher, not someone who does the work.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tile w-5 h-450 cut-line">
+    <div class="tile-label">PATHWAY 2: QUALITY OF WORK — 5" × 4.50"</div>
+    <div class="tile-content">
+      <ul>
+        <li>AI improves surface-level quality (clarity, grammar, organization) for feedback/revision (Wang and Fan).</li>
+        <li>Heavy reliance reduces deeper thinking and originality (Gerlich).</li>
+        <li>AI can make work look good but should not replace building arguments or evaluating evidence.</li>
+        <li>Best outcomes: AI used like a teacher, not a replacement.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: Pathway 3, Pathway 4 -->
+<div class="print-page">
+  <div class="tile w-5 h-400 cut-line">
+    <div class="tile-label">PATHWAY 3: RETENTION / LEARNING — 5" × 4.00"</div>
+    <div class="tile-content">
+      <ul>
+        <li>When AI gives final answers, students retain less—skip practice (Barcaui).</li>
+        <li>Higher AI reliance linked to lower critical thinking (Gerlich).</li>
+        <li>AI helps if used for practice questions, self-explanations, study planning.</li>
+        <li>Retention depends on whether AI reduces thinking or increases active learning.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tile w-5 h-300 cut-line">
+    <div class="tile-label">PATHWAY 4: MODERATING FACTORS — 5" × 3.00"</div>
+    <div class="tile-content">
+      <ul>
+        <li>Clear policies and AI literacy matter; vague rules encourage misuse (UNESCO).</li>
+        <li>Assessment design matters—if only final product is graded, students skip real thinking (TEQSA).</li>
+        <li>Assignment structure matters more than the tool itself.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- PAGE 4: Quantitative Visual -->
+<div class="print-page">
+  <div class="tile w-5 h-550 cut-line">
+    <div class="tile-label">QUANTITATIVE VISUAL (BAR/LINE GRAPH) — 5" × 5.50"</div>
+    <div class="tile-content" style="display:flex;align-items:center;justify-content:center;min-height:5in;color:#999;">
+      [Add your chart/graph here — e.g., retention 57.5% vs 68.5% from Barcaui study]
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 5: Limitations, Conclusion, Footer -->
+<div class="print-page">
+  <div class="tile w-5 h-350 cut-line">
+    <div class="tile-label">LIMITATIONS — 5" × 3.50"</div>
+    <div class="tile-content">
+      <ul>
+        <li>Many studies rely on self-reported AI use or short-term outcomes; long-term effects understudied (Gerlich).</li>
+        <li>AI changes fast—findings can become outdated as models and rules evolve (EDUCAUSE).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tile w-5 h-300 cut-line">
+    <div class="tile-label">OVERALL CONCLUSION / WHAT I LEARNED — 5" × 3.00"</div>
+    <div class="tile-content">
+      <ul>
+        <li>Outcomes depend more on how AI is used than whether it is used (Wang and Fan; Risko and Gilbert).</li>
+        <li>Best solution: clear rules and assignments that require evidence of understanding, drafts, explanations (TEQSA).</li>
+        <li>Biggest risk: better-looking work with less retention and critical thinking.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tile w-5 h-225 cut-line">
+    <div class="tile-label">Name / Course / Date / Works Cited — Place at BOTTOM</div>
+    <div class="tile-content">
+      <p><strong>Name:</strong> ____________ &nbsp;&nbsp; <strong>Course:</strong> ____________ &nbsp;&nbsp; <strong>Date:</strong> ____________</p>
+      <p style="font-size:8pt;margin-top:8px;">Optional: Mini Works-Cited note / QR code area</p>
+      <p style="font-size:7pt;color:#666;">Keep in-box citations short (author/year); attach full Works Cited separately if required.</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

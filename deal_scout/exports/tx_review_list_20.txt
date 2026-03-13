@@ -1,0 +1,62 @@
+TX properties for review (high sell-through / active areas)
+Source: tx_pipeline_all_scored.csv  →  20 properties
+
+ 1. 21746 County Road 2138, Troup, TX, 75789 — Smith County (3 in county)
+    Troup 75789  |  $189,000  |  45.364 ac  |  DOM 23  |  Score 80  review
+
+ 2. E Fm 581, Lometa, TX, 76853 — Lampasas County (2 in county)
+    Lometa 76853  |  $275,000  |  30.0841 ac  |  DOM 408  |  Score 70  manual_review
+
+ 3. TRACT Seven Venus Rd, Gladewater, TX, 75647 — Gregg County (3 in county)
+    Gladewater 75647  |  $136,153  |  38.323 ac  |  DOM 42  |  Score 65  review
+
+ 4. 299 CR 779, Devine, TX, 78016 — Medina County (4 in county)
+    Devine 78016  |  $265,000  |  31.584 ac  |  DOM 142  |  Score 60  review
+
+ 5. 5403 Dry Creek Ln, Calvert, TX, 77837 — Robertson County (2 in county)
+    Calvert 77837  |  $329,000  |  40.0 ac  |  DOM 169  |  Score 50  manual_review
+
+ 6. 0 Co Rd #218, Forney, TX, 75126 — Kaufman County (3 in county)
+    Forney 75126  |  $399,000  |  27.4 ac  |  DOM 330  |  Score 45  manual_review
+
+ 7. 101 Highway, Ranger, TX, 76470 — Eastland County (5 in county)
+    Ranger 76470  |  $299,000  |  48.12 ac  |  DOM 5  |  Score 40  reject
+
+ 8. 0 Pr Riley LOT 23, Poteet, TX, 78065 — Atascosa County (6 in county)
+    Poteet 78065  |  $147,500  |  14.024 ac  |  DOM 42  |  Score 40  reject
+
+ 9. County Road 3419, Hawkins, TX, 75765 — Wood County (3 in county)
+    Hawkins 75765  |  $60,000  |  16.46 ac  |  DOM 51  |  Score 40  reject
+
+10. Vz County Road 1905, Edgewood, TX, 75117 — Van Zandt County (2 in county)
+    Edgewood 75117  |  $98,000  |  17.14 ac  |  DOM 51  |  Score 40  reject
+
+11. Tbdlot 3 County Rd #2240, Grapeland, TX, 75844 — Houston County (4 in county)
+    Grapeland 75844  |  $68,000  |  12.0 ac  |  DOM 57  |  Score 40  reject
+
+12. 8740 Parkview Ct, Cleburne, TX, 76033 — Johnson County (3 in county)
+    Cleburne 76033  |  $79,000  |  6.116 ac  |  DOM 62  |  Score 40  reject
+
+13. 122313 Old Port Isabel Rd, Pt Isabel, TX, 78578 — Cameron County (4 in county)
+    Pt Isabel 78578  |  $32,000  |  6.5 ac  |  DOM 97  |  Score 35  reject
+
+14. 1293 Windflower Way, Allen, TX, 75013 — Collin County (5 in county)
+    Allen 75013  |  $75,000  |  7.14 ac  |  DOM 108  |  Score 35  reject
+
+15. Palmetto Rd, Magnolia, TX, 77354 — Montgomery County (8 in county)
+    Magnolia 77354  |  $175,000  |  18.59 ac  |  DOM 147  |  Score 35  reject
+
+16. 34823 Fm 1301 Rd, West Columbia, TX, 77486 — Brazoria County (3 in county)
+    West Columbia 77486  |  $6,032  |  5.73 ac  |  DOM 156  |  Score 35  reject
+
+17. LOT 19 County Road 4813, Commerce, TX, 75428 — Hunt County (7 in county)
+    Commerce 75428  |  $89,900  |  12.1 ac  |  DOM 1  |  Score 30  reject
+
+18. Morgan Cemetary Rd, Cleveland, TX, 77328 — Montgomery County (8 in county)
+    Cleveland 77328  |  $75,000  |  7.5 ac  |  DOM 2  |  Score 30  reject
+
+19. Rs County Rd #1520, Pt, TX, 75472 — Rains County (2 in county)
+    Pt 75472  |  $184,140  |  10.23 ac  |  DOM 7  |  Score 30  reject
+
+20. 162 Zinnia LOT 668, Spring Branch, TX, 78070 — Comal County (3 in county)
+    Spring Branch 78070  |  $145,000  |  6.52 ac  |  DOM 13  |  Score 30  reject

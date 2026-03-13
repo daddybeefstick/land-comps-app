@@ -1,0 +1,25 @@
+{
+  "cat1": {
+    "searchResults": {
+      "listResults": [
+        {
+          "property": {
+            "zpid": "199849083",
+            "price": {"value": 220000},
+            "lotSizeWithUnit": {"lotSize": 40.21, "lotSizeUnit": "acre"},
+            "address": {
+              "streetAddress": "40 Acres Haw Branch Road",
+              "city": "Beulaville",
+              "state": "NC",
+              "zipcode": "28518"
+            },
+            "location": {"latitude": 34.92, "longitude": -77.76},
+            "hdpView": {"hdpUrl": "/homedetails/199849083_zpid/"},
+            "daysOnZillow": 15,
+            "hdpData": {"homeInfo": {"homeType": "LOT", "zpid": "199849083", "county": "Onslow County"}}
+          }
+        }
+      ]
+    }
+  }
+}

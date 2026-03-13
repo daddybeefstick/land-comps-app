@@ -1,0 +1,7 @@
+id,zpid,state,county,address,city,zipcode,price,acres,price_per_acre,days_on_market,score,status,roi_pct,net_profit,red_flags
+2914,447922951,TX,Smith County,"21746 County Road 2138, Troup, TX, 75789",Troup,75789,189000.0,45.364,4166.3,23,80,review,160.55,303447.75,Projected profit is estimated
+2989,446004373,TX,Lampasas County,"E Fm 581, Lometa, TX, 76853",Lometa,76853,275000.0,30.0841,9141.04,408,70,manual_review,102.04,280610.9,"Projected profit is estimated, Long DOM"
+2927,459939009,TX,Gregg County,"TRACT Seven Venus Rd, Gladewater, TX, 75647",Gladewater,75647,136153.0,38.323,3552.78,42,65,review,99.45,135400.88,Projected profit is estimated
+2943,224944537,TX,Medina County,"299 CR 779, Devine, TX, 78016",Devine,78016,265000.0,31.584,8390.32,142,60,review,68.02,180263.65,Projected profit is estimated
+2857,456789682,TX,Robertson County,"5403 Dry Creek Ln, Calvert, TX, 77837",Calvert,77837,329000.0,40.0,8225.0,169,50,manual_review,62.83,206710.6,"Projected profit is estimated, Borderline deal kept for manual review"
+2854,2060438770,TX,Kaufman County,"0 Co Rd #218, Forney, TX, 75126",Forney,75126,399000.0,27.4,14562.04,330,45,manual_review,51.76,206540.0,"Projected profit is estimated, Long DOM, Borderline deal kept for manual review"

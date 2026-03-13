@@ -1,0 +1,44 @@
+{
+  "searchResults": [
+    {
+      "property": {
+        "zpid": "2123947089",
+        "price": {"value": 225000},
+        "lotSizeWithUnit": {"lotSize": 43.84, "lotSizeUnit": "acre"},
+        "address": {
+          "streetAddress": "1915 Reams Road",
+          "city": "Nashville",
+          "state": "NC",
+          "zipcode": "27856",
+          "county": "Nash County"
+        },
+        "location": {"latitude": 35.96, "longitude": -77.97},
+        "hdpView": {"hdpUrl": "/homedetails/2123947089_zpid/"},
+        "daysOnZillow": 82,
+        "zoning": "R-A",
+        "hdpData": {"homeInfo": {"homeType": "LOTS_LAND", "zpid": "2123947089"}},
+        "propertyType": "LOTS_LAND"
+      },
+      "resultType": "FOR_SALE"
+    },
+    {
+      "property": {
+        "zpid": "441772239",
+        "price": {"value": 152000},
+        "lotSizeWithUnit": {"lotSize": 29.85, "lotSizeUnit": "acre"},
+        "address": {
+          "streetAddress": "00 Ethridge Road",
+          "city": "Whitakers",
+          "state": "NC",
+          "zipcode": "27891"
+        },
+        "location": {"latitude": 35.88, "longitude": -77.82},
+        "hdpView": {"hdpUrl": "/homedetails/441772239_zpid/"},
+        "daysOnZillow": 12,
+        "hdpData": {"homeInfo": {"homeType": "LOTS_LAND", "zpid": "441772239", "county": "Nash County"}},
+        "propertyType": "LOTS_LAND"
+      }
+    }
+  ],
+  "resultsCount": 2
+}
