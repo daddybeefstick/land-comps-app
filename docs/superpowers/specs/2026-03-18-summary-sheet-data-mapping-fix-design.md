@@ -70,9 +70,13 @@ The data pipeline from the Zillow userscript panel to the Google Sheets Summary 
 - Persisted in `savePanelState()` and restored on page load
 
 #### Fix targetRow persistence
-- Add `targetRow: targetRowInput.value` to the `savePanelState()` call inside the goBtn click handler
-- Also add `acres` and `parentPrice` values to the same save call
+- The goBtn click handler calls `savePanelState()` with a new object that omits `targetRow`, overwriting the value previously saved by the input listener. Fix by including `targetRow: targetRowInput.value` in that object.
+- Also include `acres` and `parentPrice` values in the same save call
 - Restore all three on page load from saved state
+
+#### Empty address fallback
+- Current code falls back to an ISO date string when session is empty. After rename, this would put a date in the Address column.
+- Change fallback: if Address is blank when sending, show a validation message ("Enter an address") instead of silently using a date string.
 
 #### No changes needed
 - `scrapeListings()` — "End of matching results" boundary already implemented
@@ -89,17 +93,21 @@ The data pipeline from the Zillow userscript panel to the Google Sheets Summary 
 | `amountCalc` | `targetBuyPrice` | 4 | D |
 | `avgMonthCalc` | `totalRetail` | 24 | X |
 
-All other COL names stay the same.
+All other COL names stay the same. All references to renamed keys throughout the file must be updated — this includes `doPost()`, `formatRow()`, `initHeaders()`, and `resetFormatting()`.
+
+**Note:** The transport field in the payload stays `meta.parcelPrice` (not renamed to `meta.parentPrice`). The COL name `parentPrice` matches the sheet header; the transport name `parcelPrice` stays for backward compatibility. The mapping is: `meta.parcelPrice` → `COL.parentPrice` → Column C.
 
 #### `initHeaders()` updates
 
 **Row 1 group headers** — fix merge spans to exactly 5 cols per group:
-- Cols 1-7: blank (left side)
-- Cols 8-12 (H-L): "90 Days" — 5 cols
-- Cols 13-17 (M-Q): "6 Months" — 5 cols
-- Cols 18-22 (R-V): "12 Months" — 5 cols
-- Col 23 (W): "Trend"
-- Col 24 (X): "Total Retail $"
+
+Current (broken) → Fixed:
+- Cols 1-7 → Cols 1-7: blank (left side) — unchanged
+- Cols 8-13 (6 cols) → Cols 8-12 (5 cols, H-L): text "90 Days"
+- Cols 14-18 (5 cols) → Cols 13-17 (5 cols, M-Q): text "6 Months"
+- Cols 19-22 (4 cols) → Cols 18-22 (5 cols, R-V): text "12 Months"
+- Col 23 (W): text "Trend" — unchanged
+- Col 24 (X): text "Total Retail $" (short label; Row 2 has full name)
 
 **Row 2 headers** — exact text:
 ```
@@ -114,18 +122,23 @@ Trend, Total Retail $ All Child Parcels
 
 #### `doPost()` updates
 - Rename `session` variable to `address` for clarity
-- Column A: `sheet.getRange(r, COL.address).setValue(address)` (was `session`)
+- Column A: `sheet.getRange(r, COL.address).setValue(address)` (was `COL.area` / `session`)
 - Keep `meta.acres` and `meta.parcelPrice` handling (already correct)
+- Update the `findOrCreateRow()` call site to pass `address` instead of `session`
 
 #### `findOrCreateRow()` updates
-- Match on `address` + `acreage` instead of `session` + `acreage`
 - Parameter rename: `session` → `address`
+- Match on `address` + `acreage` instead of `session` + `acreage`
 
 #### No changes needed
 - For Sale handling: triplication to H, M, R stays
 - All formulas: already correct
-- `formatRow()`: already correct (just uses COL references which will be renamed)
+- `formatRow()`: COL reference names change but logic/behavior stays the same
 - `computeMedian()`: unchanged
+
+## Migration
+
+After deploying the updated Apps Script, **delete the existing Summary sheet** in Google Sheets. The script will recreate it with correct headers on the next send. Alternatively, run `resetFormatting()` from the Apps Script editor to re-apply headers and formatting in place.
 
 ## Data Flow (After Fix)
 
