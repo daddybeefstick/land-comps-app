@@ -52,31 +52,36 @@ The data pipeline from the Zillow userscript panel to the Google Sheets Summary 
 
 #### Rename "Session label" to "Address"
 - Change input label from "Session label" to "Address"
+- Variable stays `sessionInput` (rename is cosmetic, not structural)
 - Change placeholder to `"123 Main St, City, ST"`
-- The value continues to be sent as `session` in the JSON payload (transport field name unchanged for simplicity)
-- Default value generation removed — field starts empty or restored from saved state
+- The value continues to be sent as `session` in the JSON payload (transport field name unchanged)
+- Default value generation (`new Date()... + lat,lng r=...mi`) removed — field starts empty or restored from saved state
 
 #### Add Acres input
-- New number input field in the Sheets section (below divider, after Address)
+- New number input field (`acresInput`) in the Sheets section (below divider, after Address, before Target Row)
 - Label: "Acres"
-- Sent as `meta.acres`
-- Persisted in `savePanelState()` and restored on page load
+- Sent as `meta.acres` in the `sheetsBtn` click handler's `meta` object construction
+- Persisted as `acres` key in `savePanelState()` and restored on page load
 
 #### Add Parent Price input
-- New number input field after Acres
+- New number input field (`parentPriceInput`) after Acres, before Target Row
 - Label: "Parent Price Zillow"
-- Placeholder: `"$150,000"`
-- Sent as `meta.parcelPrice`
-- Persisted in `savePanelState()` and restored on page load
+- Sent as `meta.parcelPrice` in the `sheetsBtn` click handler's `meta` object construction
+- Persisted as `parentPrice` key in `savePanelState()` and restored on page load
+
+#### Panel field order (below divider)
+1. Address (renamed from Session label)
+2. Acres (new)
+3. Parent Price Zillow (new)
+4. Target Row (existing, moves after new fields)
 
 #### Fix targetRow persistence
-- The goBtn click handler calls `savePanelState()` with a new object that omits `targetRow`, overwriting the value previously saved by the input listener. Fix by including `targetRow: targetRowInput.value` in that object.
-- Also include `acres` and `parentPrice` values in the same save call
-- Restore all three on page load from saved state
+- The goBtn click handler calls `savePanelState()` with a new object that omits `targetRow`, overwriting the value previously saved by the input listener. Fix by including all Sheets-section fields in that object: `session`, `acres`, `parentPrice`, `targetRow`.
+- Restore all on page load from saved state
 
-#### Empty address fallback
-- Current code falls back to an ISO date string when session is empty. After rename, this would put a date in the Address column.
-- Change fallback: if Address is blank when sending, show a validation message ("Enter an address") instead of silently using a date string.
+#### Empty address validation
+- Current code in `sheetsBtn` click handler falls back to an ISO date string when session is empty (`sessionInput.value.trim() || new Date()...`). After rename, this would put a date in the Address column.
+- Replace fallback: if Address is blank when sending, show a validation message ("Enter an address") and return early instead of sending.
 
 #### No changes needed
 - `scrapeListings()` — "End of matching results" boundary already implemented
@@ -99,15 +104,16 @@ All other COL names stay the same. All references to renamed keys throughout the
 
 #### `initHeaders()` updates
 
-**Row 1 group headers** — fix merge spans to exactly 5 cols per group:
+**Row 1 group headers** — fix both merge spans AND text:
 
-Current (broken) → Fixed:
-- Cols 1-7 → Cols 1-7: blank (left side) — unchanged
-- Cols 8-13 (6 cols) → Cols 8-12 (5 cols, H-L): text "90 Days"
-- Cols 14-18 (5 cols) → Cols 13-17 (5 cols, M-Q): text "6 Months"
-- Cols 19-22 (4 cols) → Cols 18-22 (5 cols, R-V): text "12 Months"
-- Col 23 (W): text "Trend" — unchanged
-- Col 24 (X): text "Total Retail $" (short label; Row 2 has full name)
+| Cols | Current span | Current text | Fixed span | New text |
+|------|-------------|--------------|------------|----------|
+| 1-7 | 1-7 (7 cols) | (blank) | 1-7 (7 cols) | (blank) — unchanged |
+| H-L | 8-13 (6 cols) | "Sold (last 90 days)" | 8-12 (5 cols) | "90 Days" |
+| M-Q | 14-18 (5 cols) | "Sold (last 6 months)" | 13-17 (5 cols) | "6 Months" |
+| R-V | 19-22 (4 cols) | "Sold (last 12 months)" | 18-22 (5 cols) | "12 Months" |
+| W | 23 | "Trend\n(6m→12m)" | 23 | "Trend" |
+| X | 24 | "AVG Month\ncalc $" | 24 | "Total Retail $" (short label; Row 2 has full name) |
 
 **Row 2 headers** — exact text:
 ```
@@ -125,6 +131,7 @@ Trend, Total Retail $ All Child Parcels
 - Column A: `sheet.getRange(r, COL.address).setValue(address)` (was `COL.area` / `session`)
 - Keep `meta.acres` and `meta.parcelPrice` handling (already correct)
 - Update the `findOrCreateRow()` call site to pass `address` instead of `session`
+- Keep server-side fallback `(payload.session || new Date().toISOString())` as defensive backup — the userscript validates before sending, but the server should not crash on an empty address
 
 #### `findOrCreateRow()` updates
 - Parameter rename: `session` → `address`
