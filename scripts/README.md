@@ -1,38 +1,32 @@
-# Scrape AI Land Dealz (NC zipcodes + colors)
+# Scrape AI Land Dealz (zipcodes + colors + sell-through)
 
 ## Run the scraper
 
-1. **Install dependencies** (includes Puppeteer)
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+node scripts/scrape-ailanddealz-with-colors.js NC
+node scripts/scrape-ailanddealz-with-colors.js TN
+node scripts/scrape-ailanddealz-with-colors.js OH
+```
 
-2. **Run the script**
-   ```bash
-   npm run scrape:nc
-   ```
+Log in at `app.ailanddealz.com` when the browser opens, then press ENTER.
 
-3. A browser window opens and goes to `app.ailanddealz.com`. **Log in** if you're not already.
+## Output
 
-4. The script will:
-   - Navigate to NC (state_id=38)
-   - Click through each county (25 per page, 4 pages)
-   - For each county, paginate through zipcode pages
-   - Extract zip + color (Green/Yellow/Red) from each card
-   - Save to `data/scraped-nc-zipcodes.csv`
+**`data/scraped-{state}-zipcodes.csv`**
+```
+State,Zip,County,Green,Yellow,Red,Parcels,Zip_STR_6mo,Zip_STR_12mo,County_STR_6mo,County_STR_12mo,County_Parcels
+```
 
-5. **Output format** (same as your Google Sheet):
-   ```
-   NC,Zip,County,Green,Yellow,Red
-   NC,27201,Alamance County,Green,,
-   NC,27215,Alamance County,,,Red
-   ...
-   ```
+**`data/scraped-{state}-counties.csv`**
+```
+State,County,Parcels,STR_6mo,STR_12mo
+```
 
-## If it doesn't find elements
+Colors come only from inline `style="color:..."` on the site (real Red/Green/Yellow).
 
-The site's HTML may differ. Open DevTools (F12) on the AI Land Dealz page and update the selectors in `scrape-ailanddealz.js` (around line 20). Look for:
+## States
 
-- County cards/links
-- Zip code cards
-- Next/pagination buttons
+Predefined IDs: NC(38), SC(48), FL(12), GA(13), TN(47), OH(39), AZ(4).
+
+If the wrong state loads, pick the state on the site and use `--state-id=NN` from the URL.
