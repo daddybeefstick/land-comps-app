@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from config import ZILLOW_PROPERTY_BY_ZPID_ENDPOINT, ZILLOW_SEARCH_BY_BOUNDS_ENDPOINT
+from config import MAX_PURCHASE_PRICE, ZILLOW_PROPERTY_BY_ZPID_ENDPOINT, ZILLOW_SEARCH_BY_BOUNDS_ENDPOINT
 from modules.zillow.cache import get_enrichment, set_enrichment
 from modules.zillow.client import ZillowClient
 from modules.zillow.mapper import extract_candidates, map_search_payload
@@ -18,7 +18,7 @@ DEFAULT_SEARCH_PARAMS = {
     "listingStatus": "For_Sale",
     "sortOrder": "Homes_for_you",
     "homeType": "Lots-Land",
-    "listPriceRange": "min:1,max:500000",
+    "listPriceRange": f"min:1,max:{int(MAX_PURCHASE_PRICE)}",
     "lotSizeRange": "min:871200,max:2178000",  # 20-50 acres in sqft
     "bed_min": "No_Min",
     "bed_max": "No_Max",

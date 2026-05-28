@@ -79,7 +79,15 @@
     const cards = document.querySelectorAll('article[data-zpid], [data-test="property-card"]');
     const rows = [];
     const seen = new Set();
+    // Find the "End of matching results" boundary to exclude "Similar results nearby"
+    let boundary = null;
+    document.querySelectorAll('*').forEach((el) => {
+      if (!boundary && el.children.length === 0 && el.textContent.trim() === 'End of matching results') {
+        boundary = el;
+      }
+    });
     cards.forEach((card) => {
+      if (boundary && boundary.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING) return;
       const isHidden = card.style.display === 'none';
       // Try data-zpid first, then extract from homedetails URL
       let zpid = card.dataset.zpid || '';
@@ -493,16 +501,15 @@
     const sessionInput = document.createElement('input');
     sessionInput.type = 'text';
     sessionInput.autocomplete = 'off';
-    sessionInput.placeholder = 'Session label (shared across sends)';
+    sessionInput.placeholder = '123 Main St, City, ST';
     sessionInput.style.cssText = 'width: 100%; box-sizing: border-box; padding: 4px 6px;';
-    const defaultSession = new Date().toISOString().slice(0, 10) + ' | ' + latInput.value + ',' + lngInput.value + ' r=' + radiusInput.value + 'mi';
-    sessionInput.value = saved && saved.session ? saved.session : defaultSession;
+    sessionInput.value = saved && saved.session ? saved.session : '';
     sessionInput.addEventListener('input', () => {
       const s = getSavedPanelState() || {};
       s.session = sessionInput.value;
       savePanelState(s);
     });
-    wrap.appendChild(row('Session label', sessionInput));
+    wrap.appendChild(row('Address', sessionInput));
 
     const targetRowLabel = document.createElement('div');
     targetRowLabel.style.cssText = 'font-weight: 700; margin-bottom: 4px; font-size: 12px;';
@@ -512,8 +519,8 @@
     };
     const targetRowInput = document.createElement('input');
     targetRowInput.type = 'number';
-    targetRowInput.min = '1';
-    targetRowInput.max = '200';
+    targetRowInput.min = '3';
+    targetRowInput.max = '202';
     targetRowInput.step = '1';
     targetRowInput.placeholder = 'auto';
     targetRowInput.style.cssText = 'flex: 1; min-width: 0; box-sizing: border-box; padding: 4px 6px; text-align: center;';
@@ -531,7 +538,7 @@
     rowMinusBtn.style.cssText = 'width: 28px; height: 28px; padding: 0; font-size: 16px; cursor: pointer; flex-shrink: 0;';
     rowMinusBtn.addEventListener('click', () => {
       const cur = parseInt(targetRowInput.value, 10);
-      targetRowInput.value = Math.max(1, (isNaN(cur) ? 2 : cur) - 1);
+      targetRowInput.value = Math.max(3, (isNaN(cur) ? 4 : cur) - 1);
       persistRow();
     });
     const rowPlusBtn = document.createElement('button');
@@ -540,7 +547,7 @@
     rowPlusBtn.style.cssText = 'width: 28px; height: 28px; padding: 0; font-size: 16px; cursor: pointer; flex-shrink: 0;';
     rowPlusBtn.addEventListener('click', () => {
       const cur = parseInt(targetRowInput.value, 10);
-      targetRowInput.value = Math.min(200, (isNaN(cur) ? 0 : cur) + 1);
+      targetRowInput.value = Math.min(202, (isNaN(cur) ? 2 : cur) + 1);
       persistRow();
     });
     const rowControlFlex = document.createElement('div');
@@ -574,7 +581,8 @@
       const rows = scrapeListings();
       if (!rows.length) { sheetsStatus.textContent = 'No listings found on this page.'; return; }
       const type = modeSelect.value;
-      const session = sessionInput.value.trim() || new Date().toISOString().slice(0, 10);
+      const session = sessionInput.value.trim();
+      if (!session) { sheetsStatus.textContent = 'Enter an address before sending.'; return; }
       const lotLabel = LOT_PRESETS.find(p => `${p.min}-${p.max}` === lotPresetSelect.value)?.label || 'All sizes';
       const meta = { lat: latInput.value, lng: lngInput.value, radius: radiusInput.value, lotLabel };
       if (type === 'sold_all') meta.soldAllWarning = true;
@@ -583,6 +591,49 @@
     });
     wrap.appendChild(sheetsBtn);
     wrap.appendChild(sheetsStatus);
+
+    const undoBtn = document.createElement('button');
+    undoBtn.textContent = 'Undo last send';
+    undoBtn.style.cssText = `
+      margin-top: 4px;
+      width: 100%;
+      padding: 6px;
+      background: #e8a735;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+    `;
+    undoBtn.addEventListener('click', () => {
+      sheetsStatus.textContent = 'Undoing\u2026';
+      undoBtn.disabled = true;
+      GM_xmlhttpRequest({
+        method: 'POST',
+        url: SHEETS_WEBHOOK_URL,
+        headers: { 'Content-Type': 'application/json' },
+        data: JSON.stringify({ action: 'undo' }),
+        onload(res) {
+          undoBtn.disabled = false;
+          try {
+            const body = JSON.parse(res.responseText);
+            if (body.ok) {
+              sheetsStatus.textContent = `\u2713 Undone (row ${body.row})`;
+            } else {
+              sheetsStatus.textContent = body.error || 'Undo failed';
+            }
+          } catch (_) {
+            sheetsStatus.textContent = 'Undo response error';
+          }
+        },
+        onerror() {
+          undoBtn.disabled = false;
+          sheetsStatus.textContent = 'Undo network error';
+        },
+      });
+    });
+    wrap.appendChild(undoBtn);
 
     const clearBtn = document.createElement('button');
     clearBtn.textContent = 'Clear hidden listings';

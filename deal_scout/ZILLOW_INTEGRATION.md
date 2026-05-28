@@ -60,14 +60,23 @@
 - **mapper** – raw payload → normalized models
 - **service** – search + enrichment orchestration
 
-## 6. Remaining TODOs / Not Yet Confirmed
+## 6. Parcel ID in the review sheet
 
-- [ ] Verify property-by-zpid endpoint in RapidAPI docs; set ZILLOW_PROPERTY_BY_ZPID_ENDPOINT to enable
+The **search** API (`/search/bymapbounds`) does not return parcel number. Parcel number (e.g. `2090007001`) appears on the Zillow **listing detail page** (Facts & features > Details).
+
+- **Sync script** (`scripts/sync_review_list_to_sheet.py`) now fills the **Parcel ID** column when possible:
+  1. It first tries to read parcel from stored `raw_json` (in case the search payload ever includes it).
+  2. If `ZILLOW_PROPERTY_BY_ZPID_ENDPOINT` is set in `.env`, it calls the property-by-zpid API for each row, extracts parcel from the response (e.g. `parcelNumber`, `taxAssessorParcelNumber`), and writes it to the sheet. Enrichment is rate-limited and cached.
+- To get Parcel ID populated automatically: in RapidAPI, find the **property by zpid** (or similar) endpoint for the private-zillow API, set `ZILLOW_PROPERTY_BY_ZPID_ENDPOINT` to that path (e.g. `/propertybyzpid`), then run the sync. If the endpoint is not set, Parcel ID stays blank and you can still fill it manually from the Zillow listing page.
+
+## 7. Remaining TODOs / Not Yet Confirmed
+
+- [ ] Verify property-by-zpid endpoint path/params in RapidAPI docs; set ZILLOW_PROPERTY_BY_ZPID_ENDPOINT to enable Parcel ID in the sheet
 - [ ] enrich_by_url() – only if endpoint confirmed
 - [ ] enrich_by_address() – only if endpoint confirmed
 - [ ] Full history/tax/rent support – only if endpoints confirmed
 
-## 7. Example Usage
+## 8. Example Usage
 
 ```python
 from modules.zillow.service import ZillowService

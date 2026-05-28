@@ -5,11 +5,15 @@ from config import (
     MIN_ESTIMATED_LOTS,
     PERMITS_FLAT,
     SURVEY_COST_PER_LOT,
+    TARGET_PARCEL_ACRES,
 )
 
 
 def estimated_lots(acres: float) -> int:
-    lots = int(acres // 5)
+    """Number of target-sized parcels (TARGET_PARCEL_ACRES each), clamped to MIN/MAX_ESTIMATED_LOTS."""
+    if acres <= 0 or TARGET_PARCEL_ACRES <= 0:
+        return 0
+    lots = int(acres / TARGET_PARCEL_ACRES)
     if lots < MIN_ESTIMATED_LOTS:
         return 0
     return min(lots, MAX_ESTIMATED_LOTS)
@@ -26,7 +30,7 @@ def calculate_profit(price: float, acres: float, county_median_ppa: float) -> di
             "roi_pct": 0.0,
             "commission": 0.0,
         }
-    median_lot_value = county_median_ppa * 5 if county_median_ppa else 0.0
+    median_lot_value = county_median_ppa * TARGET_PARCEL_ACRES if county_median_ppa else 0.0
     gross_revenue = lots * median_lot_value
     estimated_costs = (SURVEY_COST_PER_LOT + INFRA_COST_PER_LOT) * lots + PERMITS_FLAT + (price * HOLDING_COST_RATE)
     net_profit = gross_revenue - price - estimated_costs

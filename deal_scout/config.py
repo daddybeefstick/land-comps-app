@@ -14,12 +14,20 @@ OUTPUT_REPORTS_DIR = BASE_DIR / "outputs" / "reports"
 CACHE_DIR = BASE_DIR / ".cache"
 
 TARGET_STATES = ["TX", "FL", "TN", "NC", "SC", "AZ", "OH"]
-MAX_PURCHASE_PRICE = 500_000
+MAX_PURCHASE_PRICE = 2_000_000
 MIN_ACRES = 20.0
 MAX_ACRES = 50.0
 MIN_SCORE_FOR_REVIEW = 60
 MAX_ESTIMATED_LOTS = 10
 MIN_ESTIMATED_LOTS = 5
+# Target child parcel size (acres) for profit calc: 5 or 10; max 5 ac per parcel = default 5
+_tpa = (os.environ.get("TARGET_PARCEL_ACRES") or "5").strip() or "5"
+try:
+    TARGET_PARCEL_ACRES = int(float(_tpa))
+except (ValueError, TypeError):
+    TARGET_PARCEL_ACRES = 5
+if TARGET_PARCEL_ACRES not in (5, 10):
+    TARGET_PARCEL_ACRES = 5
 
 # Pagination: fetch up to N pages per region to get more listings (Zillow ~20/page)
 COLLECTOR_MAX_PAGES_PER_REGION = 10

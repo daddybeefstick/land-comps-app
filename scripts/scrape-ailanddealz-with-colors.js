@@ -11,8 +11,21 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
-// Verified: NC=38, SC=48, GA=13, FL=12. TN/OH — confirm state_id in site URL if scrape fails.
-const STATE_IDS = { NC: 38, SC: 48, VA: 52, GA: 13, FL: 12, TX: 49, TN: 47, OH: 39, AZ: 4 };
+// Verified on ailanddealz.com only.
+const STATE_IDS = { NC: 38, SC: 48, GA: 13, FL: 12, TN: 50, OH: 41, RI: 47 };
+
+const STATE_EXPECTED_NAME = {
+  NC: 'north carolina',
+  SC: 'south carolina',
+  FL: 'florida',
+  GA: 'georgia',
+  VA: 'virginia',
+  TX: 'texas',
+  TN: 'tennessee',
+  OH: 'ohio',
+  RI: 'rhode island',
+  AZ: 'arizona',
+};
 
 function getStateConfig() {
   if (process.argv.includes('--help') || process.argv.includes('-h')) {
@@ -20,8 +33,8 @@ function getStateConfig() {
 Usage: node scrape-ailanddealz-with-colors.js [STATE|STATE_ID|--state-id=N]
        STATE=TN npm run scrape:nc
 
-Predefined: NC(38), SC(48), GA(13), FL(12), TN(47), OH(39), AZ(4), TX(49), VA(52).
-If wrong state loads, use --state-id=NN from the site URL after selecting the state.
+Verified IDs: NC(38), SC(48), GA(13), FL(12).
+For TN, OH, etc.: open the site, select the state, copy state_id from the URL, then --state-id=NN.
 
 Outputs:
   data/scraped-{state}-zipcodes.csv  — zip, color, sell-through per zip
@@ -73,129 +86,136 @@ function normalizeCountyName(name) {
     .toLowerCase();
 }
 
-/** Shared DOM parsing logic (runs in browser). */
-const BROWSER_SCRAPE_HELPERS = `
-  function tierFromInlineStyle(styleAttr) {
-    if (!styleAttr || typeof styleAttr !== 'string') return null;
-    const m = styleAttr.match(/(?:^|;)\\s*(?:color|background-color)\\s*:\\s*([^;]+)/i);
-    const val = m ? m[1].trim().toLowerCase() : null;
-    if (!val) return null;
-    if (val === 'red') return 'Red';
-    if (val === 'green') return 'Green';
-    if (val === 'yellow') return 'Yellow';
-    const hex = val.replace(/^#/, '');
-    if (hex === 'fcf67f') return 'Yellow';
-    if (hex === '69e363') return 'Green';
-    if (hex === 'ef4444' || hex === 'dc2626') return 'Red';
-    return null;
-  }
+/**
+ * Walk the page's visible text line-by-line and extract one record per
+ * "Total # of Land Parcels" anchor. Handles narrow-column wraps where
+ * "% Sell Through Rate-12 months" spans two lines.
+ *
+ * Each card looks like:
+ *   NAME
+ *   Total # of Land Parcels
+ *   <number>
+ *   % Sell Through Rate-6 months   (may wrap to "% Sell Through Rate-6" + "months")
+ *   <number>%
+ *   % Sell Through Rate-12 months
+ *   <number>%
+ *
+ * NAME = county on state page, zip on county page.
+ */
+async function scrapeStatBlocksFromPage(page) {
+  return page.evaluate(() => {
+    const lines = (document.body.innerText || '')
+      .split(/\r?\n/)
+      .map((l) => l.trim());
 
-  function parseStats(text) {
-    const parcels = text.match(/Total\\s*#\\s*of\\s*Land\\s*Parcels\\s*([\\d,]+)/i);
-    const str6 = text.match(/Sell\\s*Through\\s*Rate-6\\s*months\\s*(\\d+)%?/i);
-    const str12 = text.match(/Sell\\s*Through\\s*Rate-12\\s*months\\s*(\\d+)%?/i);
-    return {
-      parcels: parcels ? parcels[1].replace(/,/g, '') : '',
-      str6: str6 ? str6[1] : '',
-      str12: str12 ? str12[1] : '',
-    };
-  }
-
-  function findCardRoot(el) {
-    let node = el;
-    for (let i = 0; i < 15 && node; i++) {
-      const t = node.innerText || '';
-      if (t.includes('Sell Through Rate-6 months') && t.includes('Land Parcels')) return node;
-      node = node.parentElement;
-    }
-    return null;
-  }
-
-  function findStyledZipEl(el, zip) {
-    if (el.getAttribute('style') && tierFromInlineStyle(el.getAttribute('style'))) return el;
-    for (const c of el.children || []) {
-      const t = (c.innerText || '').trim();
-      if (t === zip || (t.length < 150 && t.match(new RegExp('\\\\b' + zip + '\\\\b')))) {
-        const found = findStyledZipEl(c, zip);
-        if (found) return found;
+    function findNumberAfterLabel(startIdx, labelSubstr) {
+      let foundLabel = false;
+      for (let j = startIdx; j < lines.length && j < startIdx + 12; j++) {
+        if (!foundLabel) {
+          if (lines[j].includes(labelSubstr)) foundLabel = true;
+          continue;
+        }
+        if (!lines[j] || /^months$/i.test(lines[j])) continue;
+        const m = lines[j].match(/^(\d+)\s*%?$/);
+        if (m) return m[1];
+        if (/parcels|sell\s*through|add to cart/i.test(lines[j])) return '';
       }
+      return '';
     }
-    return null;
-  }
-`;
 
-async function scrapeCountyStatsFromPage(page) {
-  return page.evaluate(`${BROWSER_SCRAPE_HELPERS}
-    (() => {
-      const counties = [];
-      const seen = new Set();
-      const buttons = [...document.querySelectorAll('button, a, [role="button"]')];
-      for (const btn of buttons) {
-        if (!(btn.textContent || '').includes('Add to cart')) continue;
-        const card = findCardRoot(btn);
-        if (!card) continue;
-        const text = card.innerText || '';
-        if (text.match(/\\b\\d{5}\\b/)) continue;
-        const lines = text.split('\\n').map((l) => l.trim()).filter(Boolean);
-        const nameLine = lines.find(
-          (l) =>
-            l.length > 1 &&
-            l.length < 50 &&
-            !/parcel|sell through|add to cart|total|%/i.test(l) &&
-            !/^\\d+$/.test(l)
-        );
-        if (!nameLine || seen.has(nameLine.toLowerCase())) continue;
-        seen.add(nameLine.toLowerCase());
-        const stats = parseStats(text);
-        counties.push({ name: nameLine, ...stats });
+    const out = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (!/^Total\s*#\s*of\s*Land\s*Parcels$/i.test(lines[i])) continue;
+
+      let name = '';
+      let zipName = '';
+      for (let j = i - 1; j >= 0 && j >= i - 8; j--) {
+        const l = lines[j];
+        if (!l) continue;
+        if (/^img$/i.test(l)) continue;
+        if (/parcel|sell\s*through|add to cart|total|^%$|months/i.test(l)) continue;
+        if (/^\d{5}$/.test(l)) { zipName = l; break; }
+        if (/^[\d,]+%?$/.test(l)) continue;
+        if (!name) name = l;
       }
-      return counties;
-    })()
-  `);
+      name = zipName || name;
+      if (!name) continue;
+      if (/^(Counties|Zip\s*Codes|North|South|East|West)/i.test(name) && name.length > 20) continue;
+
+      let parcels = '';
+      for (let j = i + 1; j < lines.length && j <= i + 4; j++) {
+        if (!lines[j]) continue;
+        const m = lines[j].match(/^([\d,]+)$/);
+        if (m) {
+          parcels = m[1].replace(/,/g, '');
+          break;
+        }
+      }
+
+      const str6 = findNumberAfterLabel(i, 'Rate-6');
+      const str12 = findNumberAfterLabel(i, 'Rate-12');
+      out.push({ name, parcels, str6, str12 });
+    }
+    return out;
+  });
 }
 
-async function scrapeZipDataFromPage(page) {
-  return page.evaluate(`${BROWSER_SCRAPE_HELPERS}
-    (() => {
-      const items = [];
-      const seen = new Set();
+/** zip -> 'Red'|'Green'|'Yellow' from inline style="color:..." on elements whose text is exactly that zip. */
+async function scrapeZipColorsFromPage(page) {
+  return page.evaluate(() => {
+    const HEX = { fcf67f: 'Yellow', '69e363': 'Green', ef4444: 'Red', dc2626: 'Red' };
+    const NAMED = { red: 'Red', green: 'Green', yellow: 'Yellow' };
+    function tier(styleAttr) {
+      if (!styleAttr) return null;
+      const m = String(styleAttr).match(/(?:^|;)\s*(?:color|background-color)\s*:\s*([^;]+)/i);
+      if (!m) return null;
+      const v = m[1].trim().toLowerCase();
+      if (NAMED[v]) return NAMED[v];
+      const hex = v.replace(/^#/, '');
+      return HEX[hex] || null;
+    }
+    const out = {};
+    const els = document.querySelectorAll('[style*="color"]');
+    for (const el of els) {
+      const t = (el.textContent || '').trim();
+      if (!/^\d{5}$/.test(t)) continue;
+      const c = tier(el.getAttribute('style'));
+      if (c && !out[t]) out[t] = c;
+    }
+    return out;
+  });
+}
 
-      function walk(el) {
-        if (!el || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
-        const t = (el.innerText || '').trim();
-        const zipMatch = t.match(/^\\b(\\d{5})\\b$/);
-        if (zipMatch && !seen.has(zipMatch[1])) {
-          const zip = zipMatch[1];
-          let styledEl = el.getAttribute('style') ? el : findStyledZipEl(el, zip);
-          if (!styledEl && el.parentElement) styledEl = findStyledZipEl(el.parentElement, zip);
-          const styleAttr = styledEl ? styledEl.getAttribute('style') : null;
-          const tier = styleAttr ? tierFromInlineStyle(styleAttr) : null;
-          if (tier) {
-            seen.add(zip);
-            const card = findCardRoot(styledEl || el);
-            const stats = card ? parseStats(card.innerText || '') : { parcels: '', str6: '', str12: '' };
-            items.push({ zip, color: tier, ...stats });
-          }
-        }
-        const zipInBlock = t.match(/\\b(\\d{5})\\b/);
-        if (zipInBlock && !seen.has(zipInBlock[1]) && t.length < 500 && t.includes('Sell Through')) {
-          const zip = zipInBlock[1];
-          const styledEl = findStyledZipEl(el, zip) || el.querySelector('[style*="color"]');
-          const styleAttr = styledEl ? styledEl.getAttribute('style') : null;
-          const tier = styleAttr ? tierFromInlineStyle(styleAttr) : null;
-          if (tier) {
-            seen.add(zip);
-            const stats = parseStats(t);
-            items.push({ zip, color: tier, ...stats });
-          }
-        }
-        for (const c of el.children || []) walk(c);
+async function getDisplayedStateName(page) {
+  return page.evaluate(() => {
+    const names = [
+      'Rhode Island', 'North Carolina', 'South Carolina', 'West Virginia', 'New Hampshire',
+      'New Jersey', 'New Mexico', 'North Dakota', 'South Dakota', 'District of Columbia',
+      'Tennessee', 'Texas', 'Florida', 'Georgia', 'Ohio', 'Alabama', 'Alaska', 'Arizona',
+      'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Hawaii', 'Idaho',
+      'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
+      'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana',
+      'Nebraska', 'Nevada', 'New York', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Utah',
+      'Vermont', 'Virginia', 'Washington', 'Wisconsin', 'Wyoming',
+    ];
+    names.sort((a, b) => b.length - a.length);
+    const text = document.body.innerText || '';
+
+    // Prefer matches that follow the "Counties N" badge — that's the state header.
+    const countiesIdx = text.search(/Counties\s*\n+\d+/);
+    if (countiesIdx !== -1) {
+      const after = text.slice(countiesIdx, countiesIdx + 400);
+      for (const n of names) {
+        const re = new RegExp(`(?:^|\\n)\\s*${n.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\s*(?:\\n|$)`);
+        if (re.test(after)) return n;
       }
-
-      walk(document.body);
-      return items;
-    })()
-  `);
+    }
+    // Fallback: first occurrence in body
+    for (const n of names) {
+      if (text.includes(n)) return n;
+    }
+    return null;
+  });
 }
 
 async function clickZipPaginationNext(page) {
@@ -259,13 +279,13 @@ async function main() {
 
     const skipPrompt = process.env.SKIP_PROMPT === '1';
     if (!skipPrompt) {
-      console.log('\n>>> Log in if needed, then press ENTER <<<');
+      console.log('\n>>> Log in if needed in the browser window, then press ENTER. <<<');
       await ask('Press ENTER when logged in... ');
     } else {
       await wait(5000);
     }
 
-    console.log('Fetching county list + county sell-through rates...');
+    console.log('Loading state page...');
     let countiesPromise;
     page.on('response', (response) => {
       if (response.url().includes(`get-counties-by-state/${stateId}`)) {
@@ -275,15 +295,105 @@ async function main() {
     await page.goto(`${BASE_URL}/properties/browse?state_id=${stateId}`, { waitUntil: 'networkidle0', timeout: 60000 });
     await wait(3000);
 
+    // Critical: let the user clear any active filter that hides counties.
+    if (!skipPrompt) {
+      const status = await page.evaluate(() => {
+        const t = document.body.innerText || '';
+        const countiesMatch = t.match(/Counties\s*\n+(\d+)/);
+        return {
+          counties: countiesMatch ? parseInt(countiesMatch[1], 10) : null,
+          hasStr: t.includes('Sell Through Rate-6 months'),
+        };
+      });
+      if (!status.hasStr || status.counties === 0) {
+        console.log('');
+        console.log('  ⚠ The state page in the browser window is showing 0 counties.');
+        console.log('  ⚠ Look at the RIGHT PANEL — if it says "Counties 0", click the yellow');
+        console.log('  ⚠ "Filter" button and clear any active filters (or remove favorites)');
+        console.log('  ⚠ until you see counties listed.');
+        console.log('');
+        await ask('  >>> Press ENTER when counties are visible (or to continue anyway)... ');
+      }
+    }
+
+    // Wait for county cards to actually render (STR labels appear).
+    try {
+      await page.waitForFunction(
+        () => (document.body.innerText || '').includes('Sell Through Rate-6 months'),
+        { timeout: 20000 }
+      );
+    } catch {
+      console.log('  Warning: STR labels still not detected on state page within 20s.');
+    }
+    await wait(2000);
+
+    const displayedState = await getDisplayedStateName(page);
+    const expectedName = STATE_EXPECTED_NAME[stateAbbr];
+    if (displayedState && expectedName && !displayedState.toLowerCase().includes(expectedName)) {
+      throw new Error(
+        `Wrong state loaded: page shows "${displayedState}" but you requested ${stateAbbr} (state_id=${stateId}). ` +
+          `Open app.ailanddealz.com, select ${stateAbbr}, and run: node scripts/scrape-ailanddealz-with-colors.js --state-id=ID_FROM_URL`
+      );
+    }
+    if (displayedState) console.log(`  Page state: ${displayedState}`);
+
     if (!countiesPromise) throw new Error('Counties API not called. Log in and try again.');
     const countiesText = await countiesPromise;
     const counties = JSON.parse(countiesText?.trim() || '{}');
 
-    const countyCards = await scrapeCountyStatsFromPage(page);
-    for (const c of countyCards) {
-      countyStatsMap.set(normalizeCountyName(c.name), c);
+    let statePageNum = 0;
+    const maxStatePages = 20;
+    while (statePageNum < maxStatePages) {
+      const blocks = await scrapeStatBlocksFromPage(page);
+      for (const c of blocks) {
+        if (/^\d{5}$/.test(c.name)) continue;
+        const key = normalizeCountyName(c.name);
+        const prev = countyStatsMap.get(key) || {};
+        countyStatsMap.set(key, {
+          name: c.name,
+          parcels: c.parcels || prev.parcels || '',
+          str6: c.str6 || prev.str6 || '',
+          str12: c.str12 || prev.str12 || '',
+        });
+      }
+      const hasNext = await clickZipPaginationNext(page);
+      if (!hasNext) break;
+      await wait(1800);
+      statePageNum++;
     }
-    console.log(`  County cards on state page: ${countyCards.length}`);
+    console.log(`  Counties with sell-through scraped: ${countyStatsMap.size} (state pages: ${statePageNum + 1})`);
+
+    if (countyStatsMap.size === 0) {
+      const recordsZero = await page.evaluate(() => {
+        const t = document.body.innerText || '';
+        return /Showing\s+0\s+record\(s\)|Counties\s*\n+0\b/.test(t);
+      });
+      if (recordsZero) {
+        console.log('');
+        console.log('  ⚠ State page shows 0 counties — your account has filters/favorites hiding them.');
+        console.log('  ⚠ Open app.ailanddealz.com → Search → ' + stateAbbr + ', click "Filter" and clear');
+        console.log('  ⚠ any active filters (or remove favorites), then re-run.');
+        console.log('  Continuing anyway — zip-level data will still be captured.');
+        console.log('');
+      }
+      try {
+        const debugText = await page.evaluate(() => (document.body.innerText || '').slice(0, 4000));
+        const debugPath = path.join(__dirname, '../data/debug-state-page.txt');
+        fs.writeFileSync(debugPath, debugText);
+        console.log(`  Dumped state-page text to ${debugPath}`);
+      } catch {}
+    }
+
+    const outDir = path.join(__dirname, '../data');
+    if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+    const zipPath = path.join(outDir, `scraped-${stateAbbr.toLowerCase()}-zipcodes.csv`);
+    const countyPath = path.join(outDir, `scraped-${stateAbbr.toLowerCase()}-counties.csv`);
+    fs.writeFileSync(
+      zipPath,
+      'State,Zip,County,Green,Yellow,Red,Parcels,Zip_STR_6mo,Zip_STR_12mo,County_STR_6mo,County_STR_12mo,County_Parcels\n'
+    );
+    fs.writeFileSync(countyPath, 'State,County,Parcels,STR_6mo,STR_12mo\n');
+    console.log(`  Live output:\n    ${zipPath}\n    ${countyPath}\n`);
 
     const entries = Object.entries(counties);
     console.log(`Found ${entries.length} counties. Scraping zip colors + sell-through...\n`);
@@ -296,16 +406,36 @@ async function main() {
       const url = `${BASE_URL}/properties/browse?state_id=${stateId}&county_id=${countyId}`;
 
       try {
+        let subsPromise;
+        const subsListener = (response) => {
+          if (response.url().includes(`get-subdivisions-by-county/${countyId}`)) {
+            subsPromise = response.text();
+          }
+        };
+        page.on('response', subsListener);
+
         await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
         await wait(2500);
+        page.off('response', subsListener);
 
-        const allZips = [];
+        const domByZip = new Map();
         let pageNum = 0;
         const maxPages = 20;
         while (pageNum < maxPages) {
-          const batch = await scrapeZipDataFromPage(page);
-          for (const z of batch) {
-            if (!allZips.find((x) => x.zip === z.zip)) allZips.push(z);
+          const blocks = await scrapeStatBlocksFromPage(page);
+          const colors = await scrapeZipColorsFromPage(page);
+          for (const b of blocks) {
+            if (!/^\d{5}$/.test(b.name)) continue;
+            const zip = b.name;
+            if (!domByZip.has(zip)) {
+              domByZip.set(zip, {
+                zip,
+                color: colors[zip] || null,
+                parcels: b.parcels,
+                str6: b.str6,
+                str12: b.str12,
+              });
+            }
           }
           const hasNext = await clickZipPaginationNext(page);
           if (!hasNext) break;
@@ -316,11 +446,26 @@ async function main() {
           console.log(`    (pagination: ${pageNum + 1} page(s))`);
         }
 
-        for (const z of allZips) {
-          if (!z.color) continue;
-          allRows.push({
+        let apiZips = [];
+        if (subsPromise) {
+          try {
+            const subsText = await subsPromise;
+            const subs = JSON.parse(subsText?.trim() || '{}');
+            apiZips = Object.values(subs).filter((z) => /^\d{5}$/.test(String(z)));
+          } catch {
+            apiZips = [];
+          }
+        }
+        const zipList = apiZips.length > 0 ? apiZips : [...domByZip.keys()];
+        let withColor = 0;
+
+        const newRows = [];
+        for (const zip of zipList) {
+          const z = domByZip.get(String(zip)) || {};
+          if (z.color) withColor++;
+          const row = {
             state: stateAbbr,
-            zip: z.zip,
+            zip: String(zip),
             county: countyDisplay,
             green: z.color === 'Green' ? 'Green' : '',
             yellow: z.color === 'Yellow' ? 'Yellow' : '',
@@ -331,24 +476,39 @@ async function main() {
             countyStr6: countyStats.str6 || '',
             countyStr12: countyStats.str12 || '',
             countyParcels: countyStats.parcels || '',
-          });
+          };
+          allRows.push(row);
+          newRows.push(row);
         }
 
-        console.log(`  [${i + 1}/${entries.length}] ${countyDisplay}: ${allZips.length} zips (total: ${allRows.length})`);
+        // Append zip rows + the county summary row live.
+        if (newRows.length > 0) {
+          const zipAppend = newRows
+            .map(
+              (r) =>
+                `${r.state},${r.zip},${csvEscape(r.county)},${r.green},${r.yellow},${r.red},${r.parcels},${r.zipStr6},${r.zipStr12},${r.countyStr6},${r.countyStr12},${r.countyParcels}`
+            )
+            .join('\n') + '\n';
+          fs.appendFileSync(zipPath, zipAppend);
+        }
+        fs.appendFileSync(
+          countyPath,
+          `${stateAbbr},${csvEscape(countyDisplay)},${countyStats.parcels || ''},${countyStats.str6 || ''},${countyStats.str12 || ''}\n`
+        );
+
+        console.log(
+          `  [${i + 1}/${entries.length}] ${countyDisplay}: ${zipList.length} zips (${withColor} w/ color) STR ${countyStats.str6 || '-'}/${countyStats.str12 || '-'} (total: ${allRows.length})`
+        );
       } catch (e) {
         console.log(`  [${i + 1}/${entries.length}] ${countyDisplay}: error - ${e.message} (total: ${allRows.length})`);
       }
     }
 
+    // Final pass: rewrite both files sorted (live writes were in scrape order).
     allRows.sort((a, b) => {
       const cmp = (a.county || '').localeCompare(b.county || '');
       return cmp !== 0 ? cmp : (a.zip || '').localeCompare(b.zip || '');
     });
-
-    const outDir = path.join(__dirname, '../data');
-    if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-
-    const zipPath = path.join(outDir, `scraped-${stateAbbr.toLowerCase()}-zipcodes.csv`);
     const zipLines = [
       'State,Zip,County,Green,Yellow,Red,Parcels,Zip_STR_6mo,Zip_STR_12mo,County_STR_6mo,County_STR_12mo,County_Parcels',
       ...allRows.map(
@@ -356,7 +516,7 @@ async function main() {
           `${r.state},${r.zip},${csvEscape(r.county)},${r.green},${r.yellow},${r.red},${r.parcels},${r.zipStr6},${r.zipStr12},${r.countyStr6},${r.countyStr12},${r.countyParcels}`
       ),
     ];
-    fs.writeFileSync(zipPath, zipLines.join('\n'));
+    fs.writeFileSync(zipPath, zipLines.join('\n') + '\n');
 
     const countyRows = entries.map(([, countyName]) => {
       const countyDisplay = countyName.endsWith(' County') ? countyName : countyName + ' County';
@@ -370,13 +530,11 @@ async function main() {
       };
     });
     countyRows.sort((a, b) => (a.county || '').localeCompare(b.county || ''));
-
-    const countyPath = path.join(outDir, `scraped-${stateAbbr.toLowerCase()}-counties.csv`);
     const countyLines = [
       'State,County,Parcels,STR_6mo,STR_12mo',
       ...countyRows.map((r) => `${r.state},${csvEscape(r.county)},${r.parcels},${r.str6},${r.str12}`),
     ];
-    fs.writeFileSync(countyPath, countyLines.join('\n'));
+    fs.writeFileSync(countyPath, countyLines.join('\n') + '\n');
 
     console.log(`\nDone!`);
     console.log(`  Zips:     ${allRows.length} rows → ${zipPath}`);

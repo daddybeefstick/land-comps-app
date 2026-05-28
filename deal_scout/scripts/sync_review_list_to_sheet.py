@@ -63,6 +63,54 @@ def _extract_dd_info(row: dict) -> str:
     return " | ".join(parts) if parts else ""
 
 
+def _extract_parcel_from_payload(payload: dict) -> str:
+    """
+    Extract parcel number from a Zillow property-detail payload (e.g. from property-by-zpid).
+    Tries common key paths; returns empty string if not found.
+    """
+    if not isinstance(payload, dict):
+        return ""
+    # Flat and nested keys seen in Zillow/MLS-style APIs
+    candidates = [
+        payload.get("parcelNumber"),
+        payload.get("parcel_number"),
+        payload.get("parcelId"),
+        payload.get("taxAssessorParcelNumber"),
+        payload.get("apn"),
+        payload.get("taxParcelNumber"),
+    ]
+    for v in candidates:
+        if v is not None and str(v).strip():
+            return str(v).strip()
+    # Nested: property.parcelNumber, details.parcelNumber, homeInfo.parcelNumber, etc.
+    for key in ("property", "details", "homeInfo", "hdpData", "data"):
+        node = payload.get(key)
+        if isinstance(node, dict):
+            found = _extract_parcel_from_payload(node)
+            if found:
+                return found
+    # Recursively check one level of dict values (e.g. homeInfo inside property)
+    for v in payload.values():
+        if isinstance(v, dict):
+            found = _extract_parcel_from_payload(v)
+            if found:
+                return found
+    return ""
+
+
+def _extract_parcel_from_raw_json(row: dict) -> str:
+    """Try to get parcel from stored raw_json (search payload) in case it's present."""
+    raw = row.get("raw_json")
+    if not raw:
+        return ""
+    try:
+        import json
+        data = json.loads(raw)
+        return _extract_parcel_from_payload(data)
+    except (TypeError, ValueError, KeyError):
+        return ""
+
+
 def _zillow_homedetails_url(row: dict) -> str:
     """Build canonical Zillow homedetails URL (full listing page, not mobile/search)."""
     zpid = (row.get("zpid") or "").strip()
@@ -81,10 +129,36 @@ def _zillow_homedetails_url(row: dict) -> str:
 
 
 def main() -> None:
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Sync a review CSV to Google Sheets")
+    ap.add_argument(
+        "--csv",
+        type=Path,
+        default=CSV_PATH,
+        help=f"Path to CSV to sync (default: {CSV_PATH})",
+    )
+    ap.add_argument(
+        "--exclude",
+        type=Path,
+        default=EXCLUDE_ZPIDS_FILE,
+        help=f"Exclude zpids file (default: {EXCLUDE_ZPIDS_FILE})",
+    )
+    ap.add_argument(
+        "--tab-prefix",
+        default="",
+        help="Optional prefix for the new tab name (before SHEETS_SHEET_NAME base).",
+    )
+    args = ap.parse_args()
+
+    csv_path: Path = args.csv
+    exclude_file: Path = args.exclude
     spreadsheet_id = _env("SHEETS_SPREADSHEET_ID") or _env("CDA_SHEETS_SPREADSHEET_ID")
     creds_path = _env("GOOGLE_APPLICATION_CREDENTIALS")
     # New tab each run (preserves your previous work) - override with SHEETS_SHEET_NAME to use fixed tab
     base_name = _env("SHEETS_SHEET_NAME") or _env("CDA_SHEETS_SHEET_NAME") or "NC_SC"
+    if args.tab_prefix:
+        base_name = f"{args.tab_prefix}{base_name}"
     sheet_name = f"{base_name}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 
     if not spreadsheet_id or spreadsheet_id == "paste_id_here":
@@ -92,8 +166,8 @@ def main() -> None:
         print("Find it in the sheet URL: https://docs.google.com/spreadsheets/d/<THIS_ID>/edit")
         raise SystemExit(1)
 
-    if not CSV_PATH.exists():
-        print(f"Run run_nc_sc_pipeline.py then pick_review_list_nc_sc.py first.")
+    if not csv_path.exists():
+        print(f"Missing CSV: {csv_path}")
         raise SystemExit(1)
 
     try:
@@ -116,16 +190,16 @@ def main() -> None:
     creds = Credentials.from_service_account_file(creds_path, scopes=scopes)
     client = gspread.authorize(creds)
 
-    print(f"  Reading {CSV_PATH.name}...", flush=True)
-    with CSV_PATH.open(newline="", encoding="utf-8") as f:
+    print(f"  Reading {csv_path.name}...", flush=True)
+    with csv_path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         all_rows = list(reader)
         raw_fieldnames = reader.fieldnames or list(all_rows[0].keys()) if all_rows else []
 
     # Load exclude list and drop already-reviewed properties (safety: no duplicates)
     exclude_zpids: set[str] = set()
-    if EXCLUDE_ZPIDS_FILE.exists():
-        for line in EXCLUDE_ZPIDS_FILE.open(encoding="utf-8"):
+    if exclude_file.exists():
+        for line in exclude_file.open(encoding="utf-8"):
             z = line.strip()
             if z and not z.startswith("#"):
                 exclude_zpids.add(z)
@@ -146,6 +220,28 @@ def main() -> None:
         add_to_seen(r, seen_zpid, seen_addr)
         rows.append(r)
 
+    # Populate parcel_id when possible: from raw_json first, then from enrichment API if configured
+    import time
+    from config import ZILLOW_PROPERTY_BY_ZPID_ENDPOINT, MIN_SECONDS_BETWEEN_REQUESTS
+    for r in rows:
+        r["parcel_id"] = _extract_parcel_from_raw_json(r)
+    if ZILLOW_PROPERTY_BY_ZPID_ENDPOINT:
+        from modules.zillow.service import ZillowService
+        svc = ZillowService()
+        for i, r in enumerate(rows):
+            zpid = (r.get("zpid") or "").strip()
+            if not zpid or not zpid.isdigit():
+                continue
+            if r.get("parcel_id"):
+                continue  # already have from raw_json
+            payload = svc.enrich_by_zpid(zpid)
+            if payload:
+                r["parcel_id"] = _extract_parcel_from_payload(payload)
+            if (i + 1) < len(rows):
+                time.sleep(max(0.5, MIN_SECONDS_BETWEEN_REQUESTS))
+        if svc.request_count:
+            print(f"  Enrichment: {svc.request_count} property-by-zpid calls (for Parcel ID).", flush=True)
+
     if not rows:
         print("No rows in CSV (or all excluded). Run pick again after pipeline refreshes data.")
         raise SystemExit(1)
@@ -155,7 +251,7 @@ def main() -> None:
         ("address", "Address"),
         ("url", "Zillow Link"),   # clickable link for due diligence
         ("_parcel_link", "Parcel Lookup"),  # computed: Google search for county assessor/GIS
-        (None, "Parcel ID"),   # blank for user to fill after lookup
+        ("parcel_id", "Parcel ID"),   # from enrichment API or raw_json when available
         ("_dd_info", "DD Info"),  # computed: water/wetland/road/slope hints
         (None, "Image"),   # blank for user to insert images (Insert > Image > Image in cell)
         ("county", "County"),
@@ -187,7 +283,7 @@ def main() -> None:
         r = []
         for col_idx, key in enumerate(key_for_col):
             if key is None:
-                # Blank columns for user to fill (Parcel ID, Image, DD Status, DD Notes)
+                # Blank columns for user to fill (Image, DD Status, DD Notes)
                 r.append("")
             elif key == "_dd_info":
                 r.append(_extract_dd_info(row))
@@ -199,6 +295,8 @@ def main() -> None:
                     r.append(f'=HYPERLINK("{safe_url}","View on Zillow")')
                 else:
                     r.append(url or "")
+            elif key == "parcel_id":
+                r.append((row.get("parcel_id") or "").strip())
             elif key == "_parcel_link":
                 # Free parcel lookup: Google search surfaces county assessor/GIS reliably
                 addr = (row.get("address") or "").strip()

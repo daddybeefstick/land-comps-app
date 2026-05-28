@@ -1,32 +1,35 @@
 # Scrape AI Land Dealz (zipcodes + colors + sell-through)
 
-## Run the scraper
+Matches the Land Sell USA workflow: Search → State → each county → all zips with Red/Green/Yellow + sell-through rates.
 
-```bash
-npm install
+## Run
+
+```powershell
+cd C:\Users\wjc32\land-comps-app
 node scripts/scrape-ailanddealz-with-colors.js NC
-node scripts/scrape-ailanddealz-with-colors.js TN
-node scripts/scrape-ailanddealz-with-colors.js OH
 ```
 
-Log in at `app.ailanddealz.com` when the browser opens, then press ENTER.
+1. Browser opens → log in at app.ailanddealz.com (one-time session saved).
+2. Press ENTER in the terminal.
+3. Script visits each county, paginates zips, writes CSVs.
+
+**Wrong state?** Open the site, click the state, copy `state_id` from the URL:
+
+```powershell
+node scripts/scrape-ailanddealz-with-colors.js --state-id=48
+```
+
+Verified: NC=38, SC=48, FL=12, GA=13. Do **not** use TN=47 (that is Rhode Island on the site).
 
 ## Output
 
-**`data/scraped-{state}-zipcodes.csv`**
-```
-State,Zip,County,Green,Yellow,Red,Parcels,Zip_STR_6mo,Zip_STR_12mo,County_STR_6mo,County_STR_12mo,County_Parcels
-```
+| File | Contents |
+|------|----------|
+| `data/scraped-nc-zipcodes.csv` | Every zip: Green/Yellow/Red, zip STR 6mo/12mo, county STR 6mo/12mo |
+| `data/scraped-nc-counties.csv` | County parcels + STR 6mo/12mo |
 
-**`data/scraped-{state}-counties.csv`**
-```
-State,County,Parcels,STR_6mo,STR_12mo
-```
+Import both into Google Sheets for Alex.
 
-Colors come only from inline `style="color:..."` on the site (real Red/Green/Yellow).
+## Re-run NC
 
-## States
-
-Predefined IDs: NC(38), SC(48), FL(12), GA(13), TN(47), OH(39), AZ(4).
-
-If the wrong state loads, pick the state on the site and use `--state-id=NN` from the URL.
+Older `scraped-nc-zipcodes.csv` files may lack sell-through columns. Run again with the command above to refresh.
