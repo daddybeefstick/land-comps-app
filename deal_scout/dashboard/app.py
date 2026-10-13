@@ -36,7 +36,7 @@ if df.empty:
 state_options = sorted(df["state"].dropna().unique().tolist())
 selected_states = st.multiselect("States", state_options, default=state_options)
 min_score = st.slider("Min score", 0, 100, 60)
-max_price = st.number_input("Max price", min_value=0, value=500000, step=10000)
+max_price = st.number_input("Max price", min_value=0, value=2000000, step=10000)
 
 view = df[(df["state"].isin(selected_states)) & (df["score"] >= min_score) & (df["price"] <= max_price)]
 

@@ -1,38 +1,35 @@
-# Scrape AI Land Dealz (NC zipcodes + colors)
+# Scrape AI Land Dealz (zipcodes + colors + sell-through)
 
-## Run the scraper
+Matches the Land Sell USA workflow: Search → State → each county → all zips with Red/Green/Yellow + sell-through rates.
 
-1. **Install dependencies** (includes Puppeteer)
-   ```bash
-   npm install
-   ```
+## Run
 
-2. **Run the script**
-   ```bash
-   npm run scrape:nc
-   ```
+```powershell
+cd C:\Users\wjc32\land-comps-app
+node scripts/scrape-ailanddealz-with-colors.js NC
+```
 
-3. A browser window opens and goes to `app.ailanddealz.com`. **Log in** if you're not already.
+1. Browser opens → log in at app.ailanddealz.com (one-time session saved).
+2. Press ENTER in the terminal.
+3. Script visits each county, paginates zips, writes CSVs.
 
-4. The script will:
-   - Navigate to NC (state_id=38)
-   - Click through each county (25 per page, 4 pages)
-   - For each county, paginate through zipcode pages
-   - Extract zip + color (Green/Yellow/Red) from each card
-   - Save to `data/scraped-nc-zipcodes.csv`
+**Wrong state?** Open the site, click the state, copy `state_id` from the URL:
 
-5. **Output format** (same as your Google Sheet):
-   ```
-   NC,Zip,County,Green,Yellow,Red
-   NC,27201,Alamance County,Green,,
-   NC,27215,Alamance County,,,Red
-   ...
-   ```
+```powershell
+node scripts/scrape-ailanddealz-with-colors.js --state-id=48
+```
 
-## If it doesn't find elements
+Verified: NC=38, SC=48, FL=12, GA=13. Do **not** use TN=47 (that is Rhode Island on the site).
 
-The site's HTML may differ. Open DevTools (F12) on the AI Land Dealz page and update the selectors in `scrape-ailanddealz.js` (around line 20). Look for:
+## Output
 
-- County cards/links
-- Zip code cards
-- Next/pagination buttons
+| File | Contents |
+|------|----------|
+| `data/scraped-nc-zipcodes.csv` | Every zip: Green/Yellow/Red, zip STR 6mo/12mo, county STR 6mo/12mo |
+| `data/scraped-nc-counties.csv` | County parcels + STR 6mo/12mo |
+
+Import both into Google Sheets for Alex.
+
+## Re-run NC
+
+Older `scraped-nc-zipcodes.csv` files may lack sell-through columns. Run again with the command above to refresh.

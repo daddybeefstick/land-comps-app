@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 import pandas as pd
 
 from config import MAX_ACRES, MAX_PURCHASE_PRICE, MIN_ACRES, MIN_SCORE_FOR_REVIEW, STATE_GROWTH_BONUS
@@ -30,9 +31,15 @@ def _score_row(row: pd.Series) -> tuple[int, str, list[str]]:
 
     score += STATE_GROWTH_BONUS.get(row["state"], 0)
 
-    if row["days_on_market"] and row["days_on_market"] <= 90:
+    dom = row["days_on_market"] or 0
+    if dom and dom <= 5:
+        score += 8  # brand new listing, low exposure
+    elif dom and dom <= 90:
         score += 5
-    elif row["days_on_market"] > 180:
+    elif dom >= 300:
+        score += 3  # stale listing, possible discount
+        reasons.append("Stale listing (300+ DOM) — negotiate")
+    elif dom > 180:
         score -= 5
         reasons.append("Long DOM")
 
@@ -86,12 +93,31 @@ def _score_row(row: pd.Series) -> tuple[int, str, list[str]]:
     return max(score, 0), status, reasons
 
 
+def _trimmed_median_ppa(series: pd.Series) -> float:
+    """Median of the middle 50% of values (drop top and bottom 25% by count). Few values → raw median."""
+    vals = series.dropna()
+    if vals.empty:
+        return float("nan")
+    if len(vals) < 4:
+        return float(vals.median())
+    sorted_ = np.sort(vals)
+    n = len(sorted_)
+    low = int(n * 0.25)
+    high = max(low + 1, n - int(n * 0.25))
+    return float(np.median(sorted_[low:high]))
+
+
 def run_filter_and_score() -> pd.DataFrame:
     df = fetch_dataframe("SELECT * FROM properties WHERE acres IS NOT NULL AND price IS NOT NULL")
     if df.empty:
         return df
 
-    medians = df.groupby(["state", "county"], dropna=False)["price_per_acre"].median().reset_index()
+    # County median PPA: trimmed median (drop top/bottom 25%) to reduce outlier impact
+    medians = (
+        df.groupby(["state", "county"], dropna=False)["price_per_acre"]
+        .agg(_trimmed_median_ppa)
+        .reset_index()
+    )
     medians = medians.rename(columns={"price_per_acre": "county_median_ppa"})
     df = df.merge(medians, on=["state", "county"], how="left")
     df["percent_below_median"] = ((df["county_median_ppa"] - df["price_per_acre"]) / df["county_median_ppa"] * 100).fillna(0).round(2)
